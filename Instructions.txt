@@ -1,0 +1,81 @@
+Copy to ~/.config/brave-flags.conf
+
+
+Difficulty: ★★☆☆☆
+
+Requirements:
+
+Google Chrome >=88
+Brave >= 1.19
+Vivaldi >=3.6
+Opera >=74
+For Chromium and Firefox, see their corresponding Arch Wiki articles:
+
+Chromium: Hardware video acceleration 1,0k
+Firefox: Hardware video acceleration 867
+:information_source: Note: This doesn’t work on Wayland. You can use VA-API on XWayland, using the --use-gl=egl command line flag (untested).
+
+1. Enable the following web browser flags:
+:warning: Warning: Disabling the rendering blacklist may cause unstable behavior, including crashes of the host. See the bug reports in chrome://gpu for details.
+
+Additionally the flag --disable-gpu-driver-bug-workarounds may need to be passed to prevent GPU workaround from being used. Flags in chrome://gpu should state “Hardware accelerated” when configured and available.
+
+For Google Chrome:
+
+Create ~/.config/chrome-flags.conf and populate it with the following:
+
+--ignore-gpu-blocklist
+--enable-gpu-rasterization
+--enable-zero-copy
+--enable-features=VaapiVideoDecoder
+--disable-features=UseChromeOSDirectVideoDecoder
+X11:
+
+--use-gl=desktop
+XWayland:
+
+--use-gl=egl
+--ozone-platform-hint=auto
+Skip to Step 2
+
+For Vivaldi:
+
+The Vivaldi community package is configured to read flags from ~/.config/vivaldi-stable.conf. See Google Chrome above.
+For Opera:
+
+The Opera community package is configured to read flags from /etc/opera/default:
+
+OPERA_FLAGS="
+--enable-a-flag
+--enable-another-flag
+"
+For Brave and possibly others:
+Since other browsers like are not configured to use a user config file like Chrome, you’ll need to enable the flags in chrome://flags:
+
+Override software rendering list: chrome://flags/#ignore-gpu-blocklist
+Use GPU to rasterize web content: chrome://flags/#enable-gpu-rasterization
+Raster threads write directly to GPU memory associated with tiles: chrome://flags/#enable-zero-copy
+You’ll also need to launch the web browser using the following flags:
+
+E.g. to launch Brave on X11 using this flag:
+
+brave --use-gl=desktop --enable-features=VaapiVideoDecoder --disable-features=UseChromeOSDirectVideoDecoder
+On XWayland:
+
+brave --use-gl=egl --ozone-platform-hint=auto --enable-features=VaapiVideoDecoder --disable-features=UseChromeOSDirectVideoDecoder
+And so on.
+
+To make this change permanent, copy the browser .desktop file from /usr/share/applications/ to ~/.local/share/applications/
+(if this folder doesn’t exist, create it).
+By copying the file here, we’re making sure it won’t be overwritten by an update.
+Then, open the .desktop file (e.g. brave-browser.desktop, etc.) from this ~/.local/share/applications/ location,with a text editor.
+In this file, search for the lines starting with Exec=, and change the executable to include the flags above.
+E.g. for Vivaldi: Exec=/usr/bin/brave --enable-flag %U
+2. Install the VA-API driver to be able to decode media:
+See Arch Wiki: Hardware acceleration 1,3k. Make sure to check out the Tips and Tricks 738 section.
+3. Check if hardware-accelerated video decoding is enabled and working:
+Take it away, Arch Wiki! Read on… 738
+Sources:
+
+Arch Wiki: Chromium 7
+Linux Uprising: How To Enable Hardware Accelerated Video Decode In Google Chrome, Brave, Vivaldi And Opera Browsers On Debian, Ubuntu Or Linux Mint 30
